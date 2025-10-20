@@ -100,7 +100,7 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository }}:${{ needs.compute-version.outputs.ver }}
-            ${{ needs.compute-version.outputs.release == 'true' && 'ghcr.io/' + github.repository + ':latest' || '' }}
+            ${{ needs.compute-version.outputs.release == 'true' && format('ghcr.io/{0}:latest', github.repository) || '' }}
 
   release:
     runs-on: ubuntu-latest
