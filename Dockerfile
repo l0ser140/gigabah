@@ -39,6 +39,7 @@ RUN /usr/local/bin/blender/blender --background --python-expr "import bpy; bpy.o
 # Set Blender path in Godot editor settings
 RUN godot --headless --verbose --editor --quit
 RUN echo 'filesystem/import/blender/blender_path = "/usr/local/bin/blender/blender"' >> ~/.config/godot/editor_settings-4.5.tres
+RUN echo 'filesystem/import/blender/rpc_port = 0' >> ~/.config/godot/editor_settings-4.5.tres
 
 
 # Build the binary
@@ -47,7 +48,7 @@ FROM builder-base AS builder
 WORKDIR /GIGABAH
 COPY . /GIGABAH
 
-RUN mkdir -p .dist/linux-server
+RUN mkdir -p .dist
 RUN godot --headless --verbose --export-release --quit   "Linux Server"
 
 
