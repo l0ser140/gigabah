@@ -164,6 +164,7 @@ jobs:
       - compute-version
       - build
       - release
+      - deploy-stage
     environment:
       name: prod
     if: needs.compute-version.outputs.release == 'true'
