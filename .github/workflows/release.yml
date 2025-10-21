@@ -143,3 +143,32 @@ jobs:
           make_latest: "${{ needs.compute-version.outputs.release == 'true' }}"
           files: |
             ./.dist/*
+
+  deploy-stage:
+    runs-on: ubuntu-latest
+    needs:
+      - compute-version
+      - build
+      - release
+    environment:
+      name: stage
+    steps:
+      - name: Deploy to staging server
+        run: |
+          echo "Deploying version ${{ needs.compute-version.outputs.ver }} to staging server..."
+          # Deployment commands go here
+
+  deploy-prod:
+    runs-on: ubuntu-latest
+    needs:
+      - compute-version
+      - build
+      - release
+    environment:
+      name: prod
+    if: needs.compute-version.outputs.release == 'true'
+    steps:
+      - name: Deploy to prod server
+        run: |
+          echo "Deploying version ${{ needs.compute-version.outputs.ver }} to prod server..."
+          # Deployment commands go here
