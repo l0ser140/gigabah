@@ -152,6 +152,9 @@ jobs:
       - release
     environment:
       name: stage
+    concurrency:
+      group: deploy-stage
+      cancel-in-progress: false
     steps:
       - name: Deploy to staging server
         run: |
@@ -167,6 +170,9 @@ jobs:
       - deploy-stage
     environment:
       name: prod
+    concurrency:
+      group: deploy-prod
+      cancel-in-progress: false
     if: needs.compute-version.outputs.release == 'true'
     steps:
       - name: Deploy to prod server
