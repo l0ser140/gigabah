@@ -26,13 +26,13 @@ jobs:
         - name: Run pre-commit gdlint
           uses: pre-commit/action@v3.0.1
           with:
-            extra_args: "gdlint"
+            extra_args: "gdlint --all-files"
           continue-on-error: true
 
         - name: Run pre-commit gdformat
           uses: pre-commit/action@v3.0.1
           with:
-            extra_args: "gdformat"
+            extra_args: "gdformat --all-files"
 
   build-call:
     needs: pre-commit
