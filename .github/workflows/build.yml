@@ -77,8 +77,7 @@ jobs:
           file: ./Dockerfile
           tags: linux-dedicated:latest
           cache-from: type=registry,ref=ghcr.io/${{ github.repository }}/builder-base:cache
-          push: false
-          outputs: type=tar,dest=./.dist/linux-dedicated.tar
+          outputs: type=docker,dest=./.dist/linux-dedicated.tar
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -93,4 +92,4 @@ jobs:
     uses: ./.github/workflows/release.yml
     with:
       parent_run_id: ${{ github.run_id }}
-    if: inputs.event_name != 'pull_request'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
