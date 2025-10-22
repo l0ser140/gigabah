@@ -61,8 +61,7 @@ jobs:
 
       - name: Create macOS ZIP
         run: |
-         ln -lha ./.dist
-          zip -j "./.dist-mac/gigabah_${{ needs.compute-version.outputs.ver }}.zip" "./.dist/gigabah.app"
+          ditto -c -k --sequesterRsrc --keepParent gigabah.app ./.dist-mac/gigabah_${{ needs.compute-version.outputs.ver }}.zip
 
       - name: Upload mac artifacts
         uses: actions/upload-artifact@v4
@@ -137,6 +136,7 @@ jobs:
             | Linux Desktop | [gigabah_${{ needs.compute-version.outputs.ver }}.x86_64](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.x86_64) |
             | macOS Desktop | [gigabah_${{ needs.compute-version.outputs.ver }}.dmg](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.dmg)<br>[gigabah_${{ needs.compute-version.outputs.ver }}.zip](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.zip) |
             | Docker Server | `docker pull ghcr.io/${{ github.repository }}:${{ needs.compute-version.outputs.ver }}` |
+          generate_release_notes: true
           draft: false
           prerelease: ${{ needs.compute-version.outputs.release == 'false' }}
           make_latest: "${{ needs.compute-version.outputs.release == 'true' }}"
