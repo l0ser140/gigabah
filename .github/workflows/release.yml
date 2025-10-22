@@ -51,21 +51,24 @@ jobs:
           ref: 'v1.2.2'
           path: create-dmg
 
-      - name: Create macOS DMG
-        run: |
-          mkdir ./.dist-mac
-          ./create-dmg/create-dmg \
-            --volname "Gigabah ${{ needs.compute-version.outputs.ver }}" \
-            "./.dist-mac/gigabah_${{ needs.compute-version.outputs.ver }}.dmg" \
-            "./.dist/gigabah.app"
-
       - name: Create macOS ZIP
         run: |
           ls -lha ./.dist-mac
           ls -lha ./.dist
           ls -lha ./.dist/gigabah.app
           cd ./.dist
-          zip -ry "./.dist-mac/gigabah_${{ needs.compute-version.outputs.ver }}.zip" gigabah.app
+          mkdir ./.dist-mac
+          zip -ry gigabah_${{ needs.compute-version.outputs.ver }}.zip gigabah.app
+
+      - name: Create macOS DMG
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          mkdir ./dmg-temp
+          mv ./.dist/gigabah.app ./dmg-temp/
+          ./create-dmg/create-dmg \
+            --volname "Gigabah ${{ needs.compute-version.outputs.ver }}" \
+            "./.dist-mac/gigabah_${{ needs.compute-version.outputs.ver }}.dmg" \
+            "./dmg-temp"
 
       - name: Upload mac artifacts
         uses: actions/upload-artifact@v4
