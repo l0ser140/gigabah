@@ -44,7 +44,7 @@ jobs:
           name: build-output
           path: ./.dist
 
-      - name: Checkout repository
+      - name: Load create-dmg
         uses: actions/checkout@v5
         with:
           repository: 'create-dmg/create-dmg'
@@ -53,17 +53,25 @@ jobs:
 
       - name: Create macOS DMG
         run: |
-          unzip ./.dist/gigabah.zip -d ./.dist/
-          ls -lha ./.dist/
+          mkdir .dist-mac
           ./create-dmg/create-dmg \
             --volname "Gigabah ${{ needs.compute-version.outputs.ver }}" \
-            "./.dist/gigabah.dmg" \
-            "./.dist/gigabah.zip"
-          ls -lha ./.dist/
+            "./.dist-mac/gigabah_${{ needs.compute-version.outputs.ver }}.dmg" \
+            "./.dist/gigabah.app"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-dmg-output
+          path: .dist-mac
+          if-no-files-found: "error"
+          include-hidden-files: "true"
 
   release:
     runs-on: ubuntu-latest
-    needs: compute-version
+    needs:
+      - compute-version
+      - create-apple-dmg
     permissions:
       packages: write
       contents: write
@@ -75,6 +83,12 @@ jobs:
           run-id: ${{ inputs.parent_run_id }}
           name: build-output
           path: ./.dist
+
+      - name: Download build dmg artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: mac-dmg-output
+          path: ./.dist-mac
 
       - name: Login into ghcr.io registry
         uses: docker/login-action@v3
@@ -115,10 +129,11 @@ jobs:
             |------|----------|
             | Windows Desktop | [gigabah_${{ needs.compute-version.outputs.ver }}.exe](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.exe) |
             | Linux Desktop | [gigabah_${{ needs.compute-version.outputs.ver }}.x86_64](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.x86_64) |
-            | macOS Desktop | [gigabah_${{ needs.compute-version.outputs.ver }}.zip](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.zip) |
+            | macOS Desktop | [gigabah_${{ needs.compute-version.outputs.ver }}.dmg](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.dmg)<br>[gigabah_${{ needs.compute-version.outputs.ver }}.app](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.app) |
             | Docker Server | `docker pull ghcr.io/${{ github.repository }}:${{ needs.compute-version.outputs.ver }}` |
           draft: false
           prerelease: ${{ needs.compute-version.outputs.release == 'false' }}
           make_latest: "${{ needs.compute-version.outputs.release == 'true' }}"
           files: |
             ./.dist/*
+            ./.dist-mac/*
