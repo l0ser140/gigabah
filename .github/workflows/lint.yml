@@ -23,8 +23,16 @@ jobs:
           with:
             python-version: '3.x'
 
-        - name: Run pre-commit
+        - name: Run pre-commit gdlint
           uses: pre-commit/action@v3.0.1
+          with:
+            extra_args: "gdlint"
+          continue-on-error: true
+
+        - name: Run pre-commit gdformat
+          uses: pre-commit/action@v3.0.1
+          with:
+            extra_args: "gdformat"
 
   build-call:
     needs: pre-commit
