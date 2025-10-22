@@ -2,6 +2,11 @@ name: Release
 
 on:
   workflow_call:
+    inputs:
+      parent_run_id:
+        description: 'The workflow run ID of the build workflow that triggered this release.'
+        required: true
+        type: string
 
 jobs:
   compute-version:
@@ -23,7 +28,7 @@ jobs:
           echo "RELEASE=$RELEASE"
           echo "release=$RELEASE" >> $GITHUB_OUTPUT
 
-          echo Triggered by ${{ github.event.workflow_run.id }}
+          echo Triggered by ${{ inputs.parent_run_id }}
 
     outputs:
       ver: ${{ steps.version.outputs.ver  }}
@@ -40,6 +45,6 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v5
         with:
-          workflow: ${{ github.event.workflow_run.id }}
+          run-id: ${{ inputs.parent_run_id }}
           name: build-output
           path: ./.dist

@@ -1,6 +1,12 @@
 name: Build
 
 on:
+  push:
+    branches:
+      - main
+      - release
+    tags:
+      - '*'
   workflow_call:
   workflow_dispatch:
 
@@ -80,3 +86,5 @@ jobs:
   release:
     needs: build
     uses: ./.github/workflows/release.yml
+    with:
+      parent_run_id: ${{ github.run_id }}
