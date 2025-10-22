@@ -8,6 +8,10 @@ on:
     tags:
       - '*'
   workflow_call:
+    inputs:
+      event_name:
+        required: true
+        type: string
   workflow_dispatch:
 
 jobs:
@@ -71,6 +75,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           file: ./Dockerfile
+          tags: linux-dedicated:latest
           cache-from: type=registry,ref=ghcr.io/${{ github.repository }}/builder-base:cache
           push: false
           outputs: type=tar,dest=./.dist/linux-dedicated.tar
@@ -88,3 +93,4 @@ jobs:
     uses: ./.github/workflows/release.yml
     with:
       parent_run_id: ${{ github.run_id }}
+    if: inputs.event_name != 'pull_request'

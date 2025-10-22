@@ -48,3 +48,43 @@ jobs:
           run-id: ${{ inputs.parent_run_id }}
           name: build-output
           path: ./.dist
+
+      - name: Push Linux Dedicated Server to GHCR
+        run: |
+          docker load -i ./.dist/linux-dedicated.tar
+          docker tag linux-dedicated:latest ghcr.io/${{ github.repository }}:${{ needs.compute-version.outputs.ver }}
+          docker push ghcr.io/${{ github.repository }}:${{ needs.compute-version.outputs.ver }}
+          if [[ "${{ steps.version.outputs.release }}" == "true" ]]; then
+            docker tag linux-dedicated:latest ghcr.io/${{ github.repository }}:latest
+            docker push ghcr.io/${{ github.repository }}:latest
+          fi
+          rm -f ./.dist/linux-dedicated.tar
+
+      - name: Add version to build artifacts
+        run: |
+          for f in ./.dist/*; do
+            base="${f%.*}"
+            ext="${f##*.}"
+            mv "$f" "${base}_${{ needs.compute-version.outputs.ver }}.${ext}"
+          done
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          target_commitish: ${{ github.sha }}
+          tag_name: ${{ needs.compute-version.outputs.ver }}
+          name: "${{ needs.compute-version.outputs.ver }}"
+          body: |
+            Release ${{ needs.compute-version.outputs.ver }}
+
+            | File | Download |
+            |------|----------|
+            | Windows Desktop | [gigabah_${{ needs.compute-version.outputs.ver }}.exe](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.exe) |
+            | Linux Desktop | [gigabah_${{ needs.compute-version.outputs.ver }}.x86_64](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.x86_64) |
+            | macOS Desktop | [gigabah_${{ needs.compute-version.outputs.ver }}.zip](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.zip) |
+            | Docker Server | `docker pull ghcr.io/${{ github.repository }}:${{ needs.compute-version.outputs.ver }}` |
+          draft: false
+          prerelease: ${{ needs.compute-version.outputs.release == 'false' }}
+          make_latest: "${{ needs.compute-version.outputs.release == 'true' }}"
+          files: |
+            ./.dist/*
