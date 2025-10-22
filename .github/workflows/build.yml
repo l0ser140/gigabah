@@ -1,4 +1,4 @@
-name: Build and Release
+name: Build
 
 on:
   workflow_call:
@@ -75,9 +75,7 @@ jobs:
           file: ./Dockerfile
           cache-from: type=registry,ref=ghcr.io/${{ github.repository }}/builder-base:cache
           push: false
-          tags: |
-            ghcr.io/${{ github.repository }}:${{ needs.compute-version.outputs.ver }}
-            ${{ needs.compute-version.outputs.release == 'true' && format('ghcr.io/{0}:latest', github.repository) || '' }}
+          outputs: type=tar,dest=./.dist/linux-dedicated.tar
 
   release-call:
     needs: build
