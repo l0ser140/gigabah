@@ -28,11 +28,38 @@ jobs:
           echo "RELEASE=$RELEASE"
           echo "release=$RELEASE" >> $GITHUB_OUTPUT
 
-          echo Triggered by ${{ inputs.parent_run_id }}
-
     outputs:
       ver: ${{ steps.version.outputs.ver  }}
       release: ${{ steps.version.outputs.release }}
+
+  create-apple-dmg:
+    runs-on: macos-latest
+    needs: compute-version
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v5
+        with:
+          run-id: ${{ inputs.parent_run_id }}
+          name: build-output
+          path: ./.dist
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          repository: 'create-dmg/create-dmg.'
+          ref: 'v1.2.2'
+          path: create-dmg
+
+      - name: Create macOS DMG
+        run: |
+          unzip ./.dist/gigabah.zip -d ./.dist/
+          ls -lha ./.dist/
+          ./create-dmg/create-dmg \
+            --volname "Gigabah ${{ needs.compute-version.outputs.ver }}" \
+            "./.dist/gigabah.dmg" \
+            "./.dist/gigabah.zip"
+          ls -lha ./.dist/
 
   release:
     runs-on: ubuntu-latest
@@ -49,9 +76,15 @@ jobs:
           name: build-output
           path: ./.dist
 
+      - name: Login into ghcr.io registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Push Linux Dedicated Server to GHCR
         run: |
-          ls -lha ./.dist
           docker load -i ./.dist/linux-dedicated.tar
           docker tag linux-dedicated:latest ghcr.io/${{ github.repository }}:${{ needs.compute-version.outputs.ver }}
           docker push ghcr.io/${{ github.repository }}:${{ needs.compute-version.outputs.ver }}
