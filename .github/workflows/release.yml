@@ -51,6 +51,7 @@ jobs:
 
       - name: Push Linux Dedicated Server to GHCR
         run: |
+          ls -lha ./.dist
           docker load -i ./.dist/linux-dedicated.tar
           docker tag linux-dedicated:latest ghcr.io/${{ github.repository }}:${{ needs.compute-version.outputs.ver }}
           docker push ghcr.io/${{ github.repository }}:${{ needs.compute-version.outputs.ver }}
