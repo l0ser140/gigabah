@@ -2,9 +2,13 @@ name: Lint
 
 on:
   push:
-    branches: [ main, release ]
+    branches:
+      - main
+      - release
   pull_request:
-    branches: [ main, release ]
+    branches:
+      - main
+      - release
 
 jobs:
   pre-commit:
@@ -21,3 +25,7 @@ jobs:
 
         - name: Run pre-commit
           uses: pre-commit/action@v3.0.1
+
+  build-call:
+    needs: pre-commit
+    uses: ./.github/workflows/build.yml
