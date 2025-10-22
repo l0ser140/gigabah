@@ -86,6 +86,7 @@ jobs:
           path: .dist
           if-no-files-found: "error"
           include-hidden-files: "true"
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
 
   release:
     needs: build

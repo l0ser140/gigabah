@@ -59,13 +59,18 @@ jobs:
             "./.dist-mac/gigabah_${{ needs.compute-version.outputs.ver }}.dmg" \
             "./.dist/gigabah.app"
 
-      - name: Upload build artifacts
+      - name: Create macOS ZIP
+        run: |
+          zip "./.dist/gigabah_${{ needs.compute-version.outputs.ver }}.zip" "./.dist/gigabah.app"
+
+      - name: Upload mac artifacts
         uses: actions/upload-artifact@v4
         with:
           name: mac-dmg-output
           path: .dist-mac
           if-no-files-found: "error"
           include-hidden-files: "true"
+          retention-days: 1
 
   release:
     runs-on: ubuntu-latest
@@ -84,7 +89,7 @@ jobs:
           name: build-output
           path: ./.dist
 
-      - name: Download build dmg artifacts
+      - name: Download mac artifacts
         uses: actions/download-artifact@v5
         with:
           name: mac-dmg-output
@@ -129,7 +134,7 @@ jobs:
             |------|----------|
             | Windows Desktop | [gigabah_${{ needs.compute-version.outputs.ver }}.exe](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.exe) |
             | Linux Desktop | [gigabah_${{ needs.compute-version.outputs.ver }}.x86_64](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.x86_64) |
-            | macOS Desktop | [gigabah_${{ needs.compute-version.outputs.ver }}.dmg](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.dmg)<br>[gigabah_${{ needs.compute-version.outputs.ver }}.app](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.app) |
+            | macOS Desktop | [gigabah_${{ needs.compute-version.outputs.ver }}.dmg](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.dmg)<br>[gigabah_${{ needs.compute-version.outputs.zip }}.app](https://github.com/${{ github.repository }}/releases/download/${{ needs.compute-version.outputs.ver }}/gigabah_${{ needs.compute-version.outputs.ver }}.zip) |
             | Docker Server | `docker pull ghcr.io/${{ github.repository }}:${{ needs.compute-version.outputs.ver }}` |
           draft: false
           prerelease: ${{ needs.compute-version.outputs.release == 'false' }}
