@@ -135,6 +135,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.compute-version.outputs.ver }}
+          target_commitish: ${{ github.sha }}
           name: "${{ needs.compute-version.outputs.ver }}"
           body: |
             Release ${{ needs.compute-version.outputs.ver }}
