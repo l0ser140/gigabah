@@ -53,7 +53,7 @@ jobs:
 
       - name: Create macOS DMG
         run: |
-          mkdir .dist-mac
+          mkdir ./.dist-mac
           ./create-dmg/create-dmg \
             --volname "Gigabah ${{ needs.compute-version.outputs.ver }}" \
             "./.dist-mac/gigabah_${{ needs.compute-version.outputs.ver }}.dmg" \
@@ -61,7 +61,10 @@ jobs:
 
       - name: Create macOS ZIP
         run: |
-          ditto -c -k --sequesterRsrc --keepParent gigabah.app ./.dist-mac/gigabah_${{ needs.compute-version.outputs.ver }}.zip
+          cd ./.dist
+          ls -lha .
+          ls -la  ./.dist-mac
+          zip -ry "./.dist-mac/gigabah_${{ needs.compute-version.outputs.ver }}.zip" gigabah.app
 
       - name: Upload mac artifacts
         uses: actions/upload-artifact@v4
