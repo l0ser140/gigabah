@@ -47,7 +47,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          repository: 'create-dmg/create-dmg.'
+          repository: 'create-dmg/create-dmg'
           ref: 'v1.2.2'
           path: create-dmg
 
