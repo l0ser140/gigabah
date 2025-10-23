@@ -9,8 +9,10 @@ runs:
   using: composite
   steps:
   - run: |
+        ::group::Installing pre-commit dependencies
         python -m pip install pre-commit ansi2txt
         python -m pip freeze --local
+        ::endgroup::
     shell: bash
   - uses: actions/cache@v4
     with:

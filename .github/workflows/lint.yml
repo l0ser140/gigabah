@@ -30,6 +30,7 @@ jobs:
           with:
             extra_args: "gdformat --all-files"
 
+
   build:
     needs: pre-commit
     uses: ./.github/workflows/build.yml
