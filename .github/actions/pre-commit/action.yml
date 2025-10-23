@@ -1,0 +1,26 @@
+name: pre-commit
+description: run pre-commit
+inputs:
+  extra_args:
+    description: options to pass to pre-commit run
+    required: false
+    default: '--all-files'
+runs:
+  using: composite
+  steps:
+  - uses: actions/cache@v4
+    with:
+      path: ~/.cache/pre-commit
+      key: pre-commit-3|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
+  - run: |
+        set +e
+        pre-commit run --show-diff-on-failure --color=always ${{ inputs.extra_args }} 2>&1 | tee log.txt
+        CMD_EXIT=${PIPESTATUS[0]}
+        if [ $CMD_EXIT -ne 0 ]; then
+          echo -e "## \u26A0 Pre-commit failed" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          cat log.txt | ansi2txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          exit $CMD_EXIT
+        fi
+    shell: bash
