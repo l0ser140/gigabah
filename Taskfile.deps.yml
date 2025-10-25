@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: "3.45"
+vars:
+  TOOLS_DIR: ./.tools
+  TEMP_DIR: ./.tools/tmp
+  VERSIONS:
+    map:
+      gdscript_formatter: 0.14.0
+
+tasks:
+  install:
+    desc: "Download dev dependencies"
+    deps:
+      - task: install:gdscript-formatter
+    cmds:
+      - defer: rm -rf {{.TEMP_DIR}}
+        silent: true
+
+  prepare:
+    desc: "Prepare tools directory"
+    cmds:
+      - mkdir -p {{.TOOLS_DIR}}
+      - mkdir -p {{.TEMP_DIR}}
+
+  install:gdscript-formatter:
+    vars:
+      GDSCRIPT_FORMATTER_VERSION: "{{.VERSIONS.gdscript_formatter}}"
+    cmds:
+      - task: install:gdscript-formatter:{{OS}}
+        vars:
+          GDSCRIPT_FORMATTER_VERSION: "{{.GDSCRIPT_FORMATTER_VERSION}}"
+    status:
+      - "{{.TOOLS_DIR}}/gdscript-formatter --version | grep {{.GDSCRIPT_FORMATTER_VERSION}}"
+
+  install:gdscript-formatter:windows:
+    platforms: [windows]
+    internal: true
+    vars:
+      GDSCRIPT_FORMATTER_ARTIFACT: gdscript-formatter-windows-x86_64.exe
+    deps:
+      - task: prepare
+    cmds:
+      - powershell -Command "Invoke-WebRequest https://github.com/GDQuest/GDScript-formatter/releases/download/{{.GDSCRIPT_FORMATTER_VERSION}}/{{.GDSCRIPT_FORMATTER_ARTIFACT}}.zip -OutFile {{.TEMP_DIR}}/{{.GDSCRIPT_FORMATTER_ARTIFACT}}.zip"
+      - powershell -Command "Expand-Archive -Path "{{.TEMP_DIR}}/{{.GDSCRIPT_FORMATTER_ARTIFACT}}.zip" -DestinationPath "{{.TEMP_DIR}}" -Force"
+      - mv {{.TEMP_DIR}}/{{.GDSCRIPT_FORMATTER_ARTIFACT}} {{.TOOLS_DIR}}/gdscript-formatter.exe
+
+  install:gdscript-formatter:linux:
+    platforms: [darwin,linux]
+    internal: true
+    vars:
+      GDSCRIPT_FORMATTER_ARTIFACT: gdscript-formatter-linux-x86_64
+    deps:
+      - task: prepare
+    cmds:
+      - wget -nv -P {{.TEMP_DIR}} https://github.com/GDQuest/GDScript-formatter/releases/download/{{.GDSCRIPT_FORMATTER_VERSION}}/{{.GDSCRIPT_FORMATTER_ARTIFACT}}.zip
+      - unzip {{.TEMP_DIR}}/{{.GDSCRIPT_FORMATTER_ARTIFACT}}.zip -d {{.TEMP_DIR}}
+      - mv {{.TEMP_DIR}}/{{.GDSCRIPT_FORMATTER_ARTIFACT}} {{.TOOLS_DIR}}/gdscript-formatter
+      - chmod +x {{.TOOLS_DIR}}/gdscript-formatter
+
+  install:gdscript-formatter:darwin:
+    platforms: [darwin]
+    internal: true
+    deps:
+      - task: install:gdscript-formatter:linux
+        vars:
+          GDSCRIPT_FORMATTER_ARTIFACT: gdscript-formatter-macos-aarch64
+          GDSCRIPT_FORMATTER_VERSION: "{{.GDSCRIPT_FORMATTER_VERSION}}"
